@@ -1,0 +1,6 @@
+{
+    "Parameters": {
+      "HubAccount": "54445258715",
+      "HubEventBusName": "CentralizedHubEventbus"
+    }
+}

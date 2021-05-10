@@ -1,6 +1,6 @@
 {
     "Parameters": {
-      "OrgId": "o-t7ovgdwz3uj",
+      "OrgId": "o-t7ovgdwcaz3uj",
       "HubEventBusName": "CentralizedHubEventbus",
       "SlackHookURL" : "https://hooks.slack.com/services/A2G20SYHF/B0503P6T8W4/nKDTaWcDhwhhH2aSajF3YqSt"
     }

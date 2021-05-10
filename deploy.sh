@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Stack bucket
+# Stack bucket 
 DEST_BUCKET='centralized-events'
+
+# Stack region
 REGION='us-east-1'
 
 # HUB account environment variables
@@ -23,14 +25,13 @@ fi
 
 if [ "$1" == "hub-account" ]
   then
-    echo "Fazendo deploy na conta HUB"
     echo 'Building the template stack'
     aws cloudformation package \
         --region $REGION \
         --template-file templates/${HUB_ACCOUNT_TEMPLATE_FILE} \
         --s3-bucket $DEST_BUCKET \
         --output-template-file output/${HUB_ACCOUNT_TEMPLATE_FILE}
-    echo 'Deploying the stack'
+    echo 'Deploying the stack in the HUB Account'
     aws cloudformation deploy \
         --region $REGION \
         --template-file output/${HUB_ACCOUNT_TEMPLATE_FILE} \
@@ -41,7 +42,21 @@ if [ "$1" == "hub-account" ]
         --stack-name ${HUB_ACCOUNT_STACK_NAME}
 elif [ "$1" == "spoke-account" ]
   then
-    echo "Fazendo deploy na conta SPOKE"
+    echo 'Building the template stack'
+    aws cloudformation package \
+        --region $REGION \
+        --template-file templates/${SPOKE_ACCOUNT_TEMPLATE_FILE} \
+        --s3-bucket $DEST_BUCKET \
+        --output-template-file output/${SPOKE_ACCOUNT_TEMPLATE_FILE}
+    echo 'Deploying the stack in the Spoke Account'
+    aws cloudformation deploy \
+        --region $REGION \
+        --template-file output/${SPOKE_ACCOUNT_TEMPLATE_FILE} \
+        --capabilities CAPABILITY_NAMED_IAM \
+        --s3-bucket ${DEST_BUCKET} \
+        --parameter-overrides \
+        $(jq -r '.Parameters | keys[] as $k | "\($k)=\(.[$k])"' parameters/${SPOKE_PARAM_FILE}) \
+        --stack-name ${SPOKE_ACCOUNT_STACK_NAME}
 else
-    echo "Parametro incorreto"
+    echo "Please specify the account (HUB/Spoken)"
 fi
