@@ -52,9 +52,8 @@ Resources:
       Environment:
         Variables:
           SLACK_URL: !Ref SlackHookURL    
-      Code:
-        ZipFile: ../lambda-slack-events/
-      Handler: 'slack-sender.lambda_handler'
+      Code: ../lambda-slack-events/slack-sender.py
+      Handler: 'index.lambda_handler'
       MemorySize: 128
       Role: !GetAtt 'SlackLambdaRole.Arn'
       Runtime: 'python3.6'

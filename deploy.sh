@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stack bucket 
-DEST_BUCKET='centralized-events'
+DEST_BUCKET='centralized-events-blog-audit'
 
 # Stack region
 REGION='us-east-1'
@@ -10,10 +10,10 @@ HUB_PARAM_FILE='hub-account.json'
 HUB_ACCOUNT_STACK_NAME='hub-events'
 HUB_ACCOUNT_TEMPLATE_FILE='hub-account.yaml'
 
-# SPOKEN account environment variables
-SPOKEN_PARAM_FILE='spoken-account.json'
-SPOKEN_ACCOUNT_STACK_NAME='spoke-events'
-SPOKEN_ACCOUNT_TEMPLATE_FILE='spoke-account.yaml'
+# SPOKE account environment variables
+SPOKE_PARAM_FILE='spoke-account.json'
+SPOKE_ACCOUNT_STACK_NAME='spoke-events'
+SPOKE_ACCOUNT_TEMPLATE_FILE='spoke-account.yaml'
 
 echo "Setting the destination bucket to: " $DEST_BUCKET
 
@@ -58,5 +58,5 @@ elif [ "$1" == "spoke-account" ]
         $(jq -r '.Parameters | keys[] as $k | "\($k)=\(.[$k])"' parameters/${SPOKE_PARAM_FILE}) \
         --stack-name ${SPOKE_ACCOUNT_STACK_NAME}
 else
-    echo "Please specify the account (HUB/Spoken)"
+    echo "Please specify the account (HUB/Spoke)"
 fi
