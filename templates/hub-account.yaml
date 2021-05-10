@@ -44,7 +44,6 @@ Resources:
       Path: '/'
       ManagedPolicyArns:
       - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
-      - 'arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess'
 
   SlackLambdaFunction: 
     Type: 'AWS::Lambda::Function'
@@ -52,7 +51,7 @@ Resources:
       Environment:
         Variables:
           SLACK_URL: !Ref SlackHookURL    
-      Code: ../lambda-slack-events/slack-sender.py
+      Code: ../lambda-slack-events/
       Handler: 'slack-sender.lambda_handler'
       MemorySize: 128
       Role: !GetAtt 'SlackLambdaRole.Arn'
