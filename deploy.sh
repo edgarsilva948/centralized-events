@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Stack bucket
 DEST_BUCKET='centralized-events'
+REGION='us-east-1'
 
 # HUB account environment variables
 HUB_PARAM_FILE='hub-account.json'
@@ -13,6 +14,8 @@ SPOKEN_ACCOUNT_STACK_NAME='spoke-events'
 SPOKEN_ACCOUNT_TEMPLATE_FILE='spoke-account.yaml'
 
 echo "Setting the destination bucket to: " $DEST_BUCKET
+
+export DEFAULT_REGION=$REGION
 
 if [ ! -d "output" ]
   then
