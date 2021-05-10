@@ -15,8 +15,6 @@ SPOKEN_ACCOUNT_TEMPLATE_FILE='spoke-account.yaml'
 
 echo "Setting the destination bucket to: " $DEST_BUCKET
 
-export DEFAULT_REGION=$REGION
-
 if [ ! -d "output" ]
   then
   echo "Creating output directory"
@@ -28,11 +26,13 @@ if [ "$1" == "hub-account" ]
     echo "Fazendo deploy na conta HUB"
     echo 'Building the template stack'
     aws cloudformation package \
+        --region $REGION \
         --template-file templates/${HUB_ACCOUNT_TEMPLATE_FILE} \
         --s3-bucket $DEST_BUCKET \
         --output-template-file output/${HUB_ACCOUNT_TEMPLATE_FILE}
     echo 'Deploying the stack'
     aws cloudformation deploy \
+        --region $REGION \
         --template-file output/${HUB_ACCOUNT_TEMPLATE_FILE} \
         --capabilities CAPABILITY_NAMED_IAM \
         --s3-bucket ${DEST_BUCKET} \
