@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Create centralized EventBus for Hub Account'
+Parameters:
+  OrgId:
+    Type: String
+    Default: o-t7ovgez3uj
+    Description: 'Organization ID'
+  HubEventBusName:
+    Type: 'String'
+    Default: 'CentralizedHubEventbus'
+  SlackHookURL:
+    Type: 'String'
+    Default: 'https://hooks.slack.com/services/A2G20SYHF/B0503P6T8W4/nKDTaWcDhwhhH2aSajF3YqSt'
+
+Resources:
+  HubEventBus:
+    Type: AWS::Events::EventBus
+    Properties: 
+      Name: !Ref HubEventBusName
+
+  EventBusPolicy: 
+    Type: AWS::Events::EventBusPolicy
+    Properties: 
+      Action: "events:PutEvents"
+      EventBusName: !Ref HubEventBus
+      Principal: "*"
+      StatementId: "AllowPutEventforOrg"
+      Condition: 
+        Type: "StringEquals"
+        Key: "aws:PrincipalOrgID"
+        Value: !Ref OrgId
+
+  SlackLambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: 'lambda.amazonaws.com'
+          Action:
+          - 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+      - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      - 'arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess'
+
+  SlackLambdaFunction: 
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Environment:
+        Variables:
+          SLACK_URL: !Ref SlackHookURL    
+      Code:
+        ZipFile: ../lambda-slack-events/
+      Handler: 'slack-sender.lambda_handler'
+      MemorySize: 128
+      Role: !GetAtt 'SlackLambdaRole.Arn'
+      Runtime: 'python3.6'
+      Timeout: 60
+
+  EC2EventRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: "EventRule to invoke slack lambda"
+      EventBusName: !Ref HubEventBusName
+      EventPattern:
+        {
+          "source": [
+            "aws.ec2"
+          ],
+          "detail-type": [
+            "AWS API Call via CloudTrail"
+          ],
+          "detail": {
+            "eventSource": [
+              "ec2.amazonaws.com"
+            ],
+            "eventName": [
+              "RunInstances"
+            ]
+          }
+        }           
+      State: "ENABLED"
+      Targets: 
+        - 
+          Arn: 
+            Fn::GetAtt: 
+              - "SlackLambdaFunction"
+              - "Arn"
+          Id: "SlackFunctionV1"
+
+  EC2PermissionForEventsToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: 
+        Ref: "SlackLambdaFunction"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: 
+        Fn::GetAtt: 
+          - "EC2EventRule"
+          - "Arn"    
